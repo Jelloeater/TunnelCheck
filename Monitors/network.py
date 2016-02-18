@@ -76,7 +76,7 @@ class MonitorHost():
             raise RuntimeError("missing hostname")
 
     def run_test(self):
-        scan = PortScanner().scan(self.host, arguments='-sn --host-timeout ' + str(self.timeout) + 's')
+        scan = PortScanner().scan(hosts=self.host, arguments='-sn --host-timeout ' + str(self.timeout) + 's')
         try:
             if scan['scan'][str(self.host)]['status']['state'] == 'up':
                 return True
