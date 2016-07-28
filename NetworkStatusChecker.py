@@ -88,20 +88,24 @@ def main():
     logging.basicConfig(format="[%(asctime)s] [%(levelname)8s] --- %(message)s (%(filename)s:%(lineno)s)",
                         level=logging.DEBUG)
 
-    if not GetPRTGStatus().is_sensor_down():
-        pibrella.light.red.off()
-    else:
-        pibrella.light.red.pulse()
-
-    if not GetPRTGStatus().is_sensor_warn():
-        pibrella.light.yellow.off()
-    else:
-        pibrella.light.yellow.pulse()
-
     if MonitorHost(host=GlobalVars.FAR_SIDE_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
         pibrella.light.green.off()
+
+        if not GetPRTGStatus().is_sensor_down():
+            pibrella.light.red.off()
+        else:
+            pibrella.light.red.pulse()
+
+        if not GetPRTGStatus().is_sensor_warn():
+            pibrella.light.yellow.off()
+        else:
+            if GlobalVars.BUZZER_ALLOW:
+                pibrella.light.yellow.pulse()
+
     else:
         pibrella.light.green.pulse()
+        pibrella.light.red.pulse()
+        pibrella.light.yellow.pulse()
         VPN = True
 
     if VPN and GlobalVars.BUZZER_ALLOW is True:
