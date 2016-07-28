@@ -1,8 +1,10 @@
 import logging
 from time import sleep
-import network
 import pibrella
 import threading
+import logging
+import urllib2
+from nmap import PortScanner
 
 __author__ = 'Jesse'
 
@@ -13,6 +15,24 @@ class GlobalVars(object):
     FAR_SIDE_ROUTER = '192.168.1.1'  # GREEN_LIGHT
     TIMEOUT = 1
     BUZZER_ALLOW = True
+
+
+class MonitorHost():
+    """Ping a host to make sure it's up"""
+
+    def __init__(self, host, timeout):
+        self.host = host
+        self.timeout = timeout
+        if host == "":
+            raise RuntimeError("missing hostname")
+
+    def run_test(self):
+        scan = PortScanner().scan(hosts=self.host, arguments='-sn --host-timeout ' + str(self.timeout) + 's')
+        try:
+            if scan['scan'][str(self.host)]['status']['state'] == 'up':
+                return True
+        except KeyError:  # If we cannot find the info in the key for the status, this means the host is down
+            return False
 
 
 class GetPRTGStatus():
@@ -70,21 +90,21 @@ def main():
     logging.basicConfig(format="[%(asctime)s] [%(levelname)8s] --- %(message)s (%(filename)s:%(lineno)s)",
                         level=logging.DEBUG)
 
-    if network.MonitorHost(host=GlobalVars.LOCAL_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
+    if MonitorHost(host=GlobalVars.LOCAL_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
         pibrella.light.red.off()
     else:
         logging.error('Router Down')
         pibrella.light.red.pulse()
         LAN = True
 
-    if network.MonitorHost(host=GlobalVars.WAN_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
+    if MonitorHost(host=GlobalVars.WAN_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
         pibrella.light.yellow.off()
     else:
         logging.error('Internet Down')
         pibrella.light.yellow.pulse()
         WAN = True
 
-    if network.MonitorHost(host=GlobalVars.FAR_SIDE_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
+    if MonitorHost(host=GlobalVars.FAR_SIDE_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
         pibrella.light.green.off()
     else:
         logging.error('VPN Down')
