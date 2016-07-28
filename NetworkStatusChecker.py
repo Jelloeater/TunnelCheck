@@ -15,6 +15,27 @@ class GlobalVars(object):
     BUZZER_ALLOW = True
 
 
+class GetPRTGStatus():
+    def __init__(self):
+        import requests
+        import xmltodict
+        r = requests.get('http://probe/api/gettreenodestats.xml',
+                         params={'username': 'prtgadmin', 'password': 'prtgadmin'})
+        self.data = xmltodict.parse(r.text)
+
+    def is_sensor_down(self):
+        if self.data['data']['downsens'] > 0 or self.data['data']['downsens'] is not None:
+            return True
+        else:
+            return False
+
+    def is_sensor_warn(self):
+        if self.data['data']['warnsens'] > 0 or self.data['data']['warnsens'] is not None:
+            return True
+        else:
+            return False
+
+
 class ButtonBackground(object):
     def __init__(self):
         thread = threading.Thread(target=self.run, args=())
@@ -24,6 +45,7 @@ class ButtonBackground(object):
     @staticmethod
     def run():
         """ Method that runs forever """
+
         def button_pressed(pin):  # Changes global bool flag for buzzer
             if GlobalVars.BUZZER_ALLOW:
                 GlobalVars.BUZZER_ALLOW = False
