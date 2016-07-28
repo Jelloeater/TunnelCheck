@@ -90,16 +90,18 @@ def main():
 
     if MonitorHost(host=GlobalVars.FAR_SIDE_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
         pibrella.light.green.off()
-
-        if not GetPRTGStatus().is_sensor_down():
+        status = GetPRTGStatus()
+        if not status.is_sensor_down():
             pibrella.light.red.off()
         else:
             pibrella.light.red.pulse()
 
-        if not GetPRTGStatus().is_sensor_warn():
+        if not status.is_sensor_warn():
             pibrella.light.yellow.off()
         else:
-            if GlobalVars.BUZZER_ALLOW:
+            if not GlobalVars.BUZZER_ALLOW:
+                pibrella.light.yellow.off()
+            else:
                 pibrella.light.yellow.pulse()
 
     else:
