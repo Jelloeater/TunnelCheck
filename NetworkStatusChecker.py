@@ -84,34 +84,27 @@ class ButtonBackground(object):
 
 
 def main():
-    LAN = False
-    WAN = False
     VPN = False
     logging.basicConfig(format="[%(asctime)s] [%(levelname)8s] --- %(message)s (%(filename)s:%(lineno)s)",
                         level=logging.DEBUG)
 
-    if MonitorHost(host=GlobalVars.LOCAL_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
+    if not GetPRTGStatus().is_sensor_down():
         pibrella.light.red.off()
     else:
-        logging.error('Router Down')
         pibrella.light.red.pulse()
-        LAN = True
 
-    if MonitorHost(host=GlobalVars.WAN_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
+    if not GetPRTGStatus().is_sensor_warn():
         pibrella.light.yellow.off()
     else:
-        logging.error('Internet Down')
         pibrella.light.yellow.pulse()
-        WAN = True
 
     if MonitorHost(host=GlobalVars.FAR_SIDE_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
         pibrella.light.green.off()
     else:
-        logging.error('VPN Down')
         pibrella.light.green.pulse()
         VPN = True
 
-    if LAN and WAN and VPN and GlobalVars.BUZZER_ALLOW is True:
+    if VPN and GlobalVars.BUZZER_ALLOW is True:
         pibrella.buzzer.buzz(88)
         sleep(.5)
         pibrella.buzzer.stop()
@@ -121,4 +114,4 @@ sleep(20)  # Wait for NIC to come up
 ButtonBackground()
 while True:
     main()
-    sleep(1)
+    sleep(15)
