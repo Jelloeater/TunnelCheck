@@ -141,8 +141,11 @@ def main():
             GlobalVars.BUZZER_ALLOW = True
 
 
-sleep(20)  # Wait for NIC to come up
+# sleep(20)  # Wait for NIC to come up
 ButtonBackground()
 while True:
-    main()
-    sleep(5)
+    try:
+        main()
+        sleep(5)
+    except:
+        pass
