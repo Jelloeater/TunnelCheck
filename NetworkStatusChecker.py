@@ -91,8 +91,18 @@ def main():
                         level=logging.DEBUG)
 
     if MonitorHost(host=GlobalVars.FAR_SIDE_ROUTER, timeout=GlobalVars.TIMEOUT).run_test():
+        # Is VPN UP?
         pibrella.light.green.off()
         status = GetPRTGStatus()
+
+        # Double check to make sure alarm is really down, and not a false positive
+        i = 0 # Ugly FOR loop, because I'm lazy
+        while i < 3:
+            if status.is_sensor_down() or status.is_sensor_warn():
+                sleep(2)
+                status = GetPRTGStatus()
+            i = i + 1
+
         if not status.is_sensor_down():
             pibrella.light.red.off()
         else:
@@ -106,6 +116,7 @@ def main():
             else:
                 pibrella.light.yellow.pulse()
 
+    # Is VPN DOWN?
     else:
         pibrella.light.green.pulse()
         pibrella.light.red.pulse()
