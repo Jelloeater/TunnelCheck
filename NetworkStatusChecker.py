@@ -15,6 +15,8 @@ class GlobalVars(object):
     FAR_SIDE_ROUTER = '192.168.1.1'  # GREEN_LIGHT
     TIMEOUT = 1
     BUZZER_ALLOW = True
+    RESET_ALARM_COUNT_LIMIT = 360  # 5 seconds * 360 cycles = 30 mins
+    ALARM_COUNTER = 0
 
 
 class MonitorHost():
@@ -115,9 +117,17 @@ def main():
         sleep(.5)
         pibrella.buzzer.stop()
 
+    # Timeout check to re-arm alarm
+    if GlobalVars.BUZZER_ALLOW is False:
+        if GlobalVars.ALARM_COUNTER < GlobalVars.RESET_ALARM_COUNT_LIMIT:
+            GlobalVars.ALARM_COUNTER = GlobalVars.ALARM_COUNTER + 1
+        else:
+            GlobalVars.ALARM_COUNTER = 0
+            GlobalVars.BUZZER_ALLOW = True
+
 
 sleep(20)  # Wait for NIC to come up
 ButtonBackground()
 while True:
     main()
-    sleep(15)
+    sleep(5)
