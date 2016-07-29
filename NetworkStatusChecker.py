@@ -96,12 +96,16 @@ def main():
         status = GetPRTGStatus()
 
         # Double check to make sure alarm is really down, and not a false positive
-        i = 0 # Ugly FOR loop, because I'm lazy
-        while i < 3:
-            if status.is_sensor_down() or status.is_sensor_warn():
-                sleep(2)
+        if status.is_sensor_down() or status.is_sensor_warn():
+            i = 0  # Ugly FOR loop, because I'm lazy
+            while i < 8:
                 status = GetPRTGStatus()
-            i = i + 1
+                if status.is_sensor_down() or status.is_sensor_warn():
+                    sleep(2)
+                    i = i + 1
+                else:
+                    break
+
 
         if not status.is_sensor_down():
             pibrella.light.red.off()
